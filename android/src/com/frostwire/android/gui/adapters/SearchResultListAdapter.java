@@ -40,6 +40,7 @@ import com.frostwire.android.gui.views.SearchThumbnailImageView;
 import com.frostwire.android.util.ImageLoader;
 import com.frostwire.licenses.Licenses;
 import com.frostwire.search.FileSearchResult;
+import com.frostwire.search.KeywordFilter;
 import com.frostwire.search.SearchResult;
 import com.frostwire.search.StreamableSearchResult;
 import com.frostwire.search.soundcloud.SoundcloudSearchResult;
@@ -269,6 +270,22 @@ public abstract class SearchResultListAdapter extends AbstractListAdapter<Search
     public void setKeywordFiltersPipeline(List<KeywordFilter> keywordFiltersPipeline) {
         this.keywordFiltersPipeline.clear();
         this.keywordFiltersPipeline.addAll(keywordFiltersPipeline);
+        notifyDataSetInvalidated();
+    }
+
+    public void addKeywordFilter(KeywordFilter kf) {
+        this.keywordFiltersPipeline.add(kf);
+        notifyDataSetInvalidated();
+    }
+
+    public void removeKeywordFilter(KeywordFilter kf) {
+        this.keywordFiltersPipeline.remove(kf);
+        notifyDataSetInvalidated();
+    }
+
+    public void clearKeywordFilters() {
+        this.keywordFiltersPipeline.clear();
+        notifyDataSetInvalidated();
     }
 
     private static class OnLinkClickListener implements OnClickListener {

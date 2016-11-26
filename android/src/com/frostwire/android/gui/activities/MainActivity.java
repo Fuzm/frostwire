@@ -56,6 +56,7 @@ import com.frostwire.android.gui.NetworkManager;
 import com.frostwire.android.gui.SoftwareUpdater;
 import com.frostwire.android.gui.SoftwareUpdater.ConfigurationUpdateListener;
 import com.frostwire.android.gui.activities.internal.MainController;
+import com.frostwire.android.gui.activities.internal.NavigationMenu;
 import com.frostwire.android.gui.dialogs.HandpickedTorrentDownloadDialogOnFetch;
 import com.frostwire.android.gui.dialogs.NewTransferDialog;
 import com.frostwire.android.gui.dialogs.SDPermissionDialog;
@@ -72,7 +73,7 @@ import com.frostwire.android.gui.util.DangerousPermissionsChecker;
 import com.frostwire.android.gui.util.UIUtils;
 import com.frostwire.android.gui.views.AbstractActivity;
 import com.frostwire.android.gui.views.AbstractDialog.OnDialogClickListener;
-import com.frostwire.android.gui.activities.internal.NavigationMenu;
+import com.frostwire.android.gui.views.KeywordFilterDrawerView;
 import com.frostwire.android.gui.views.MiniPlayerView;
 import com.frostwire.android.gui.views.TimerService;
 import com.frostwire.android.gui.views.TimerSubscription;
@@ -611,6 +612,7 @@ public class MainActivity extends AbstractActivity implements ConfigurationUpdat
 
     private void setupFragments() {
         search = (SearchFragment) getFragmentManager().findFragmentById(R.id.activity_main_fragment_search);
+        search.connectDrawerLayoutFilterView((DrawerLayout) findView(R.id.activity_main_drawer_layout), findView(R.id.activity_main_keyword_filter_drawer_view));
         library = (BrowsePeerFragment) getFragmentManager().findFragmentById(R.id.activity_main_fragment_browse_peer);
         transfers = (TransfersFragment) getFragmentManager().findFragmentById(R.id.activity_main_fragment_transfers);
     }
@@ -623,7 +625,6 @@ public class MainActivity extends AbstractActivity implements ConfigurationUpdat
 
     private void setupInitialFragment(Bundle savedInstanceState) {
         Fragment fragment = null;
-
         if (savedInstanceState != null) {
             fragment = getFragmentManager().getFragment(savedInstanceState, CURRENT_FRAGMENT_KEY);
             restoreFragmentsStack(savedInstanceState);
@@ -632,7 +633,6 @@ public class MainActivity extends AbstractActivity implements ConfigurationUpdat
             fragment = search;
             setCheckedItem(R.id.menu_main_search);
         }
-
         switchContent(fragment);
     }
 
@@ -780,7 +780,7 @@ public class MainActivity extends AbstractActivity implements ConfigurationUpdat
     }
 
     private void setupDrawer() {
-        DrawerLayout drawerLayout = findView(R.id.drawer_layout);
+        DrawerLayout drawerLayout = findView(R.id.activity_main_drawer_layout);
         Toolbar toolbar = findToolbar();
         navigationMenu = new NavigationMenu(controller, drawerLayout, toolbar);
     }

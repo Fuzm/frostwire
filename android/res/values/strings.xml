@@ -673,4 +673,10 @@
     <string name="vpn_drop_protection_summary">Protect your privacy. Automatically disable BitTorrent transfers unless an encrypted VPN connection is active</string>
     <string name="dismiss">Dismiss</string>
     <string name="fullscreen">fullscreen</string>
+    <string name="filter_search_results">Filter Search Results</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="filter_by_keyword">Filter by keyword...</string>
+    <string name="search_sources">Search sources</string>
+    <string name="file_extensions">File extensions</string>
+    <string name="file_names">File names</string>
 </resources>
