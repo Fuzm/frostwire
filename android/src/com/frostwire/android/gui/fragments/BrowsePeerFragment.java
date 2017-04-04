@@ -43,6 +43,7 @@ import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Filter;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -96,7 +97,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
     private final BroadcastReceiver broadcastReceiver;
 
     private SwipeRefreshLayout swipeRefresh;
-    private ListView list;
+    private GridView list;
     private FileListAdapter adapter;
     private MenuItem checkBoxMenuItem;
     private RelativeLayout selectAllCheckboxContainer;
@@ -477,6 +478,17 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
         }
         try {
             byte fileType = (Byte) data[0];
+
+
+            int layout = 0;
+            if (fileType == Constants.FILE_TYPE_PICTURES || fileType == Constants.FILE_TYPE_VIDEOS){
+                list.setNumColumns(3);
+//                layout = R.layout.view_browse_thumbnail_peer_list_item; // TODO: Change it to grid one
+            } else {
+                list.setNumColumns(1);
+//                layout = R.layout.view_browse_thumbnail_peer_list_item; // TODO: Change it to grid one
+            }
+
             @SuppressWarnings("unchecked")
             List<FileDescriptor> items = (List<FileDescriptor>) data[1];
             adapter = new FileListAdapter(getActivity(), items, fileType) {
