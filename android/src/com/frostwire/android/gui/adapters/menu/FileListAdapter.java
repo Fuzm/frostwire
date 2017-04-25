@@ -17,6 +17,7 @@
 
 package com.frostwire.android.gui.adapters.menu;
 
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.res.Resources;
@@ -24,6 +25,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -80,8 +82,8 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     private final ImageLoader thumbnailLoader;
     private final DownloadButtonClickListener downloadButtonClickListener;
 
-    protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType, int itemLayout) {
-        super(context, itemLayout, convertFiles(files));
+    protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType) {
+        super(context, getLayoutId(fileType), convertFiles(files));
         setShowMenuOnClick(true);
         setShowMenuOnLongClick(false);
 
@@ -96,8 +98,11 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         setCheckboxesVisibility(fileType != Constants.FILE_TYPE_RINGTONES);
     }
 
-    protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType){
-        this(context, files, fileType, R.layout.view_browse_peer_thumbnail_list_item);
+    private static int getLayoutId(int fileType) {
+        int layout = (fileType == Constants.FILE_TYPE_PICTURES || fileType == Constants.FILE_TYPE_VIDEOS) ?
+                R.layout.view_browse_peer_thumbnail_grid_item :
+                R.layout.view_browse_peer_thumbnail_list_item;
+        return layout;
     }
 
     public byte getFileType() {
@@ -251,7 +256,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     private void populateViewThumbnail(View view, FileDescriptorItem item) {
         FileDescriptor fd = item.fd;
 
-        BrowseThumbnailImageButton fileThumbnail = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_browse_thumbnail_image_button);
+        BrowseThumbnailImageButton fileThumbnail = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
         fileThumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (fileType == Constants.FILE_TYPE_APPLICATIONS) {
@@ -325,7 +330,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         TextView fileSize = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
         fileSize.setText(UIUtils.getBytesInHuman(fd.fileSize));
 
-        BrowseThumbnailImageButton downloadButton = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_browse_thumbnail_image_button);
+        BrowseThumbnailImageButton downloadButton = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
 
         if (fd.equals(Engine.instance().getMediaPlayer().getCurrentFD()) || fd.equals(Engine.instance().getMediaPlayer().getSimplePlayerCurrentFD())) {
             downloadButton.setOverlayState(MediaPlaybackOverlay.MediaPlaybackState.STOP);
@@ -521,6 +526,22 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         }
 
         return result;
+    }
+
+    public int getNumColumns() {
+        if (getViewItemId() == R.layout.view_browse_peer_thumbnail_list_item) {
+            return 1;
+        }
+
+        int rotation = ((Activity) getContext()).getWindowManager().getDefaultDisplay().getRotation();
+        boolean vertical = Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation;
+
+        LOG.info("getNumColumns(): rotation -> " + rotation + ", vertical? " + vertical);
+
+        if (vertical) {
+            return 3;
+        }
+        return (int) UIUtils.getScreenInches((Activity) getContext());
     }
 
     private static class FileListFilter implements ListAdapterFilter<FileDescriptorItem> {

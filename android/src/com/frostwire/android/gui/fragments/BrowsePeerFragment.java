@@ -477,20 +477,9 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
         }
         try {
             byte fileType = (Byte) data[0];
-
-
-            int layout = 0;
-            if (fileType == Constants.FILE_TYPE_PICTURES || fileType == Constants.FILE_TYPE_VIDEOS){
-                list.setNumColumns(3);
-                layout = R.layout.view_browse_peer_thumbnail_list_image_item;
-            } else {
-                list.setNumColumns(1);
-                layout = R.layout.view_browse_peer_thumbnail_list_item;
-            }
-
-            @SuppressWarnings("unchecked")
             List<FileDescriptor> items = (List<FileDescriptor>) data[1];
-            adapter = new FileListAdapter(getActivity(), items, fileType, layout) {
+
+            adapter = new FileListAdapter(getActivity(), items, fileType) {
                 @Override
                 protected void onLocalPlay() {
                     if (adapter != null) {
@@ -517,6 +506,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
 
             };
             adapter.setCheckboxesVisibility(selectAllModeOn);
+            list.setNumColumns(adapter.getNumColumns());
             restorePreviouslyChecked();
             if (previousFilter != null) {
                 performFilter(previousFilter);
