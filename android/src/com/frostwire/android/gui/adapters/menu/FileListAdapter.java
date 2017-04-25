@@ -80,8 +80,8 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     private final ImageLoader thumbnailLoader;
     private final DownloadButtonClickListener downloadButtonClickListener;
 
-    protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType) {
-        super(context, R.layout.view_browse_thumbnail_peer_list_item, convertFiles(files));
+    protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType, int itemLayout) {
+        super(context, itemLayout, convertFiles(files));
         setShowMenuOnClick(true);
         setShowMenuOnLongClick(false);
 
@@ -94,6 +94,10 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
 
         checkSDStatus();
         setCheckboxesVisibility(fileType != Constants.FILE_TYPE_RINGTONES);
+    }
+
+    protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType){
+        this(context, files, fileType, R.layout.view_browse_thumbnail_peer_list_item);
     }
 
     public byte getFileType() {

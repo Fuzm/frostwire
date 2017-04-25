@@ -483,15 +483,15 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
             int layout = 0;
             if (fileType == Constants.FILE_TYPE_PICTURES || fileType == Constants.FILE_TYPE_VIDEOS){
                 list.setNumColumns(3);
-//                layout = R.layout.view_browse_thumbnail_peer_list_item; // TODO: Change it to grid one
+                layout = R.layout.view_browse_thumbnail_peer_list_image_item;
             } else {
                 list.setNumColumns(1);
-//                layout = R.layout.view_browse_thumbnail_peer_list_item; // TODO: Change it to grid one
+                layout = R.layout.view_browse_thumbnail_peer_list_item;
             }
 
             @SuppressWarnings("unchecked")
             List<FileDescriptor> items = (List<FileDescriptor>) data[1];
-            adapter = new FileListAdapter(getActivity(), items, fileType) {
+            adapter = new FileListAdapter(getActivity(), items, fileType, layout) {
                 @Override
                 protected void onLocalPlay() {
                     if (adapter != null) {
