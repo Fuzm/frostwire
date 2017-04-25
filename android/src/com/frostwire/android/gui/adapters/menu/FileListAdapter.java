@@ -97,7 +97,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     protected FileListAdapter(Context context, List<FileDescriptor> files, byte fileType){
-        this(context, files, fileType, R.layout.view_browse_thumbnail_peer_list_item);
+        this(context, files, fileType, R.layout.view_browse_peer_thumbnail_list_item);
     }
 
     public byte getFileType() {
@@ -251,7 +251,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     private void populateViewThumbnail(View view, FileDescriptorItem item) {
         FileDescriptor fd = item.fd;
 
-        BrowseThumbnailImageButton fileThumbnail = findView(view, R.id.view_browse_peer_list_item_file_thumbnail);
+        BrowseThumbnailImageButton fileThumbnail = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_browse_thumbnail_image_button);
         fileThumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (fileType == Constants.FILE_TYPE_APPLICATIONS) {
@@ -287,18 +287,18 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
             }
         }
 
-        TextView title = findView(view, R.id.view_browse_peer_list_item_file_title);
+        TextView title = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
         title.setText(fd.title);
 
         if (fd.fileType == Constants.FILE_TYPE_AUDIO || fd.fileType == Constants.FILE_TYPE_APPLICATIONS) {
-            TextView fileExtra = findView(view, R.id.view_browse_peer_list_item_extra_text);
+            TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
             fileExtra.setText(fd.artist);
         } else {
-            TextView fileExtra = findView(view, R.id.view_browse_peer_list_item_extra_text);
+            TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
             fileExtra.setText(R.string.empty_string);
         }
 
-        TextView fileSize = findView(view, R.id.view_browse_peer_list_item_file_size);
+        TextView fileSize = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
         fileSize.setText(UIUtils.getBytesInHuman(fd.fileSize));
 
         fileThumbnail.setTag(fd);
@@ -310,10 +310,10 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     private void populateViewPlain(View view, FileDescriptorItem item) {
         FileDescriptor fd = item.fd;
 
-        TextView title = findView(view, R.id.view_browse_peer_list_item_file_title);
+        TextView title = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
         title.setText(fd.title);
 
-        TextView fileExtra = findView(view, R.id.view_browse_peer_list_item_extra_text);
+        TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
         if (fd.fileType == Constants.FILE_TYPE_AUDIO || fd.fileType == Constants.FILE_TYPE_APPLICATIONS) {
             fileExtra.setText(fd.artist);
         } else if (fd.fileType == Constants.FILE_TYPE_DOCUMENTS) {
@@ -322,10 +322,10 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
             fileExtra.setText(R.string.empty_string);
         }
 
-        TextView fileSize = findView(view, R.id.view_browse_peer_list_item_file_size);
+        TextView fileSize = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
         fileSize.setText(UIUtils.getBytesInHuman(fd.fileSize));
 
-        BrowseThumbnailImageButton downloadButton = findView(view, R.id.view_browse_peer_list_item_file_thumbnail);
+        BrowseThumbnailImageButton downloadButton = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_browse_thumbnail_image_button);
 
         if (fd.equals(Engine.instance().getMediaPlayer().getCurrentFD()) || fd.equals(Engine.instance().getMediaPlayer().getSimplePlayerCurrentFD())) {
             downloadButton.setOverlayState(MediaPlaybackOverlay.MediaPlaybackState.STOP);
@@ -340,7 +340,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void populateSDState(View v, FileDescriptorItem item) {
-        ImageView img = findView(v, R.id.view_browse_peer_list_item_sd);
+        ImageView img = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_sd);
 
         if (item.inSD) {
             if (item.mounted) {
@@ -360,9 +360,9 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void setNormalTextColors(View v) {
-        TextView title = findView(v, R.id.view_browse_peer_list_item_file_title);
-        TextView text = findView(v, R.id.view_browse_peer_list_item_extra_text);
-        TextView size = findView(v, R.id.view_browse_peer_list_item_file_size);
+        TextView title = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
+        TextView text = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
+        TextView size = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
 
         Resources res = getContext().getResources();
 
@@ -372,9 +372,9 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void setInactiveTextColors(View v) {
-        TextView title = findView(v, R.id.view_browse_peer_list_item_file_title);
-        TextView text = findView(v, R.id.view_browse_peer_list_item_extra_text);
-        TextView size = findView(v, R.id.view_browse_peer_list_item_file_size);
+        TextView title = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
+        TextView text = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
+        TextView size = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
 
         Resources res = getContext().getResources();
 

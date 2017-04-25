@@ -44,7 +44,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.GridView;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -483,10 +482,10 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
             int layout = 0;
             if (fileType == Constants.FILE_TYPE_PICTURES || fileType == Constants.FILE_TYPE_VIDEOS){
                 list.setNumColumns(3);
-                layout = R.layout.view_browse_thumbnail_peer_list_image_item;
+                layout = R.layout.view_browse_peer_thumbnail_list_image_item;
             } else {
                 list.setNumColumns(1);
-                layout = R.layout.view_browse_thumbnail_peer_list_item;
+                layout = R.layout.view_browse_peer_thumbnail_list_item;
             }
 
             @SuppressWarnings("unchecked")
