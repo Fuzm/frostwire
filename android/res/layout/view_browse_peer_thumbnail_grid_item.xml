@@ -32,13 +32,16 @@
         android:background="@color/app_browse_thumbnail_background"
         android:contentDescription="@null" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/view_browse_peer_thumbnail_grid_checkbox_textview"
         android:layout_width="match_parent"
         android:layout_height="128dp"
-        android:text="&#x2713;"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="@color/basic_blue_highlight"
-        android:background="@drawable/view_browse_peer_thumbnail_grid_checkbox_background"/>
+        android:background="@color/app_grid_selected_background">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/browse_peer_grid_check" />
+    </FrameLayout>
 </RelativeLayout>
