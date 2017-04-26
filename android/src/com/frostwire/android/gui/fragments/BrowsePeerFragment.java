@@ -330,7 +330,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
                 }
             }
         });
-        list = findView(v, R.id.fragment_browse_peer_list);
+        list = findView(v, R.id.fragment_browse_peer_gridview);
         SwipeLayout swipe = findView(v, R.id.fragment_browse_peer_swipe);
         swipe.setOnSwipeListener(new SwipeLayout.OnSwipeListener() {
             @Override

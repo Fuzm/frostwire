@@ -28,6 +28,8 @@ import android.provider.MediaStore.Video;
 import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.CheckBox;
+import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -104,6 +106,31 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
                 R.layout.view_browse_peer_thumbnail_list_item;
         return layout;
     }
+
+
+//    @Override
+//    protected void initCheckBox(View view, FileDescriptorItem item) {
+//        if (getViewItemId() == R.layout.view_browse_peer_thumbnail_list_item) {
+//            super.initCheckBox(view, item);
+//        } else {
+//            /**
+//            CheckBox checkbox = findView(view, R.id.view_selectable_list_item_checkbox);
+//            if (checkbox != null) {
+//                checkbox.setVisibility((checkboxesVisibility) ? View.VISIBLE : View.GONE);
+//                if (checkbox.getVisibility() == View.VISIBLE) {
+//                    checkbox.setOnCheckedChangeListener(null);
+//                    checkbox.setChecked(checked.contains(item));
+//                    checkbox.setTag(item);
+//                    checkbox.setOnCheckedChangeListener(checkboxOnCheckedChangeListener);
+//                }
+//            }
+//            if (view instanceof Checkable) {
+//                ((Checkable) view).setChecked(checked.contains(item));
+//            }
+//             */
+//        }
+//    }
+
 
     public byte getFileType() {
         return fileType;
@@ -259,9 +286,12 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         BrowseThumbnailImageButton fileThumbnail = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
         fileThumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
+        int thumbnailDimensions = getViewItemId() == R.layout.view_browse_peer_thumbnail_grid_item ?
+                128 : 96;
+
         if (fileType == Constants.FILE_TYPE_APPLICATIONS) {
             Uri uri = Uri.withAppendedPath(ImageLoader.APPLICATION_THUMBNAILS_URI, fd.album);
-            thumbnailLoader.load(uri, fileThumbnail, 96, 96);
+            thumbnailLoader.load(uri, fileThumbnail, thumbnailDimensions, thumbnailDimensions);
         } else {
             if (in(fileType, Constants.FILE_TYPE_AUDIO, Constants.FILE_TYPE_VIDEOS)) {
                 if (fd.equals(Engine.instance().getMediaPlayer().getCurrentFD())) {
@@ -281,14 +311,14 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
                 Uri uri = ContentUris.withAppendedId(ImageLoader.ALBUM_THUMBNAILS_URI, fd.albumId);
                 Uri uriRetry = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, fd.id);
                 uriRetry = ImageLoader.getMetadataArtUri(uriRetry);
-                thumbnailLoader.load(uri, uriRetry, fileThumbnail, 96, 96);
+                thumbnailLoader.load(uri, uriRetry, fileThumbnail, thumbnailDimensions, thumbnailDimensions);
             } else if (fd.fileType == Constants.FILE_TYPE_VIDEOS) {
                 Uri uri = ContentUris.withAppendedId(Video.Media.EXTERNAL_CONTENT_URI, fd.id);
                 Uri uriRetry = ImageLoader.getMetadataArtUri(uri);
-                thumbnailLoader.load(uri, uriRetry, fileThumbnail, 96, 96);
+                thumbnailLoader.load(uri, uriRetry, fileThumbnail, thumbnailDimensions, thumbnailDimensions);
             } else if (fd.fileType == Constants.FILE_TYPE_PICTURES) {
                 Uri uri = ContentUris.withAppendedId(Images.Media.EXTERNAL_CONTENT_URI, fd.id);
-                thumbnailLoader.load(uri, fileThumbnail, 96, 96);
+                thumbnailLoader.load(uri, fileThumbnail, thumbnailDimensions, thumbnailDimensions);
             }
         }
 
