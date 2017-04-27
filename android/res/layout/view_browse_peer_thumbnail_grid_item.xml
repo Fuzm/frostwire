@@ -33,11 +33,12 @@
         android:contentDescription="@null" />
 
     <FrameLayout
-        android:id="@+id/view_browse_peer_thumbnail_grid_checkbox_textview"
+        android:id="@+id/view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout"
         android:layout_width="match_parent"
         android:layout_height="128dp"
-        android:background="@color/app_grid_selected_background">
-
+        android:background="@color/app_grid_selected_background"
+        android:clickable="true"
+        android:visibility="gone">
         <ImageView
             android:layout_width="30dp"
             android:layout_height="wrap_content"

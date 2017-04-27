@@ -1,6 +1,8 @@
+
 /*
- * Created by Angel Leon (@gubatron), Alden Torres (aldenml)
- * Copyright (c) 2011-2016, FrostWire(R). All rights reserved.
+ * Created by Angel Leon (@gubatron), Alden Torres (aldenml),
+ * Marcelina Knitter (@marcelinkaaa), Jose Molina (@votaguz)
+ * Copyright (c) 2011-2017, FrostWire(R). All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.frostwire.android.gui.adapters.menu;
 
 import android.app.Activity;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.Checkable;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,6 +43,7 @@ import com.frostwire.android.core.FileDescriptor;
 import com.frostwire.android.gui.Librarian;
 import com.frostwire.android.gui.adapters.menu.FileListAdapter.FileDescriptorItem;
 import com.frostwire.android.gui.services.Engine;
+import com.frostwire.android.gui.util.CheckableViewWrapper;
 import com.frostwire.android.gui.util.UIUtils;
 import com.frostwire.android.gui.views.AbstractListAdapter;
 import com.frostwire.android.gui.views.BrowseThumbnailImageButton;
@@ -75,6 +78,8 @@ import java.util.Map.Entry;
  *
  * @author gubatron
  * @author aldenml
+ * @author marcelinkaaa
+ * @author votaguz
  */
 public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
 
@@ -108,28 +113,37 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
 
-//    @Override
-//    protected void initCheckBox(View view, FileDescriptorItem item) {
-//        if (getViewItemId() == R.layout.view_browse_peer_thumbnail_list_item) {
-//            super.initCheckBox(view, item);
-//        } else {
-//            /**
-//            CheckBox checkbox = findView(view, R.id.view_selectable_list_item_checkbox);
-//            if (checkbox != null) {
-//                checkbox.setVisibility((checkboxesVisibility) ? View.VISIBLE : View.GONE);
-//                if (checkbox.getVisibility() == View.VISIBLE) {
-//                    checkbox.setOnCheckedChangeListener(null);
-//                    checkbox.setChecked(checked.contains(item));
-//                    checkbox.setTag(item);
-//                    checkbox.setOnCheckedChangeListener(checkboxOnCheckedChangeListener);
-//                }
-//            }
-//            if (view instanceof Checkable) {
-//                ((Checkable) view).setChecked(checked.contains(item));
-//            }
-//             */
-//        }
-//    }
+    @Override
+    protected void initCheckBox(View view, FileDescriptorItem item) {
+        int adapterLayoutId = getViewItemId();
+        if (adapterLayoutId == R.layout.view_browse_peer_thumbnail_list_item) {
+            super.initCheckBox(view, item);
+        } else if (adapterLayoutId == R.layout.view_browse_peer_thumbnail_grid_item) {
+            CheckBox regularCheckbox = findView(view, R.id.view_selectable_list_item_checkbox);
+            if (regularCheckbox != null) {
+                regularCheckbox.setVisibility(View.GONE);
+            }
+
+            FrameLayout overlayCheckmarkFramelayout = findView(view, R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
+            if (overlayCheckmarkFramelayout != null) {
+                CheckableViewWrapper checkableView = new CheckableViewWrapper(overlayCheckmarkFramelayout, new CheckboxOnCheckedChangeListener(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                }));
+
+                overlayCheckmarkFramelayout.setVisibility((getCheckboxesVisibility()) ? View.VISIBLE : View.GONE);
+                if (overlayCheckmarkFramelayout.getVisibility() == View.VISIBLE) {
+                    final boolean checked = getChecked().contains(item);
+                    checkableView.setOnCheckedChangeListener(null);
+                    checkableView.setChecked(checked);
+                    checkableView.setTag(item);
+                    checkableView.setOnCheckedChangeListener(getDefaultOnCheckedChangeListener());
+                }
+            }
+        }
+    }
 
 
     public byte getFileType() {
@@ -286,7 +300,8 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         BrowseThumbnailImageButton fileThumbnail = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
         fileThumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        int thumbnailDimensions = getViewItemId() == R.layout.view_browse_peer_thumbnail_grid_item ?
+        boolean inGridMode = inGridMode();
+        int thumbnailDimensions = inGridMode ?
                 128 : 96;
 
         if (fileType == Constants.FILE_TYPE_APPLICATIONS) {
@@ -322,24 +337,27 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
             }
         }
 
-        TextView title = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
-        title.setText(fd.title);
-
-        if (fd.fileType == Constants.FILE_TYPE_AUDIO || fd.fileType == Constants.FILE_TYPE_APPLICATIONS) {
-            TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
-            fileExtra.setText(fd.artist);
-        } else {
-            TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
-            fileExtra.setText(R.string.empty_string);
+        if (!inGridMode) {
+            TextView title = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
+            title.setText(fd.title);
+            if (fd.fileType == Constants.FILE_TYPE_AUDIO || fd.fileType == Constants.FILE_TYPE_APPLICATIONS) {
+                TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
+                fileExtra.setText(fd.artist);
+            } else {
+                TextView fileExtra = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
+                fileExtra.setText(R.string.empty_string);
+            }
+            TextView fileSize = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
+            fileSize.setText(UIUtils.getBytesInHuman(fd.fileSize));
         }
-
-        TextView fileSize = findView(view, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
-        fileSize.setText(UIUtils.getBytesInHuman(fd.fileSize));
-
         fileThumbnail.setTag(fd);
         fileThumbnail.setOnClickListener(downloadButtonClickListener);
 
         populateSDState(view, item);
+    }
+
+    private boolean inGridMode() {
+        return getViewItemId() == R.layout.view_browse_peer_thumbnail_grid_item;
     }
 
     private void populateViewPlain(View view, FileDescriptorItem item) {
@@ -375,6 +393,10 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void populateSDState(View v, FileDescriptorItem item) {
+        if (inGridMode()){
+            // gotta see what to do here
+            return;
+        }
         ImageView img = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_sd);
 
         if (item.inSD) {
@@ -395,6 +417,9 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void setNormalTextColors(View v) {
+        if (inGridMode()) {
+            return;
+        }
         TextView title = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
         TextView text = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
         TextView size = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_size);
@@ -407,6 +432,9 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void setInactiveTextColors(View v) {
+        if (inGridMode()) {
+            return;
+        }
         TextView title = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_title);
         TextView text = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_extra_text);
         TextView size = findView(v, R.id.view_browse_peer_thumbnail_list_image_item_file_size);

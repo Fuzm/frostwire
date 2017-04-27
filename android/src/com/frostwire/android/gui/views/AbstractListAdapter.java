@@ -157,6 +157,10 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         return (checked == null || checked.isEmpty()) ? 0 : checked.size();
     }
 
+    public CheckboxOnCheckedChangeListener getDefaultOnCheckedChangeListener() {
+        return this.checkboxOnCheckedChangeListener;
+    }
+
     public void clearChecked() {
         if (checked != null && checked.size() > 0) {
             checked.clear();
@@ -394,11 +398,11 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         return false;
     }
 
-    protected void onItemChecked(CompoundButton v, boolean isChecked) {
-        if (v instanceof CheckBox) {
+    protected void onItemChecked(View v, boolean isChecked) {
+        if (v instanceof Checkable) {
             onCheckboxItemChecked(v, isChecked);
         } else if (v instanceof RadioButton) {
-            onRadioButtonItemChecked(v, isChecked);
+            onRadioButtonItemChecked((RadioButton) v, isChecked);
         }
 
         notifyDataSetInvalidated();
@@ -408,7 +412,7 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         }
     }
 
-    private void onCheckboxItemChecked(CompoundButton v, boolean isChecked) {
+    private void onCheckboxItemChecked(View v, boolean isChecked) {
         T item = (T) v.getTag();
         if (item != null) {
             if (isChecked && !checked.contains(item)) {
@@ -425,9 +429,8 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
 
     }
 
-    private void onRadioButtonItemChecked(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView instanceof RadioButton && isChecked) {
-            final RadioButton radioButton = (RadioButton) buttonView;
+    private void onRadioButtonItemChecked(RadioButton radioButton, boolean isChecked) {
+        if (isChecked) {
             T item = (T) radioButton.getTag();
             int position = (item == null) ? 0 : getList().indexOf(item);
             updateLastRadioButtonChecked(position);
@@ -549,7 +552,7 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
     }
 
     public interface OnItemCheckedListener<T> {
-        void onItemChecked(CompoundButton v, T item, boolean checked);
+        void onItemChecked(View v, T item, boolean checked);
     }
 
     public void setOnItemCheckedListener(OnItemCheckedListener<T> onItemCheckedListener) {
@@ -598,10 +601,28 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         }
     }
 
-    private final class CheckboxOnCheckedChangeListener implements OnCheckedChangeListener {
-        @SuppressWarnings("unchecked")
+    public final class CheckboxOnCheckedChangeListener implements OnCheckedChangeListener {
+        private final Runnable onPostCheckedChange;
+        public CheckboxOnCheckedChangeListener() {
+            onPostCheckedChange = null;
+        }
+        public CheckboxOnCheckedChangeListener(Runnable onPostCheckedChange) {
+            this.onPostCheckedChange = onPostCheckedChange;
+        }
+
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             onItemChecked(buttonView, isChecked);
+            onPostCheckedChange();
+        }
+
+        public void onCheckedChanged(View view, boolean isChecked) {
+            onItemChecked(view, isChecked);
+        }
+
+        private void onPostCheckedChange() {
+            if (onPostCheckedChange != null) {
+                onPostCheckedChange.run();
+            }
         }
     }
 

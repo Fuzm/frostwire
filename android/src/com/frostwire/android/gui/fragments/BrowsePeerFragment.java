@@ -488,7 +488,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
                 }
 
                 @Override
-                protected void onItemChecked(CompoundButton v, boolean isChecked) {
+                protected void onItemChecked(View v, boolean isChecked) {
                     super.onItemChecked(v, isChecked);
                     autoCheckUnCheckSelectAllCheckbox();
                     selectionModeCallback.onItemChecked(getActivity(), adapter.getCheckedCount());
