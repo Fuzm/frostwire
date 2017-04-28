@@ -36,40 +36,27 @@ import java.lang.ref.WeakReference;
  */
 
 
-public final class CheckableViewWrapper<T> extends View implements Checkable {
+public abstract class CheckableViewWrapper<T> extends View implements Checkable {
     private static final Logger LOG = Logger.getLogger(CheckableViewWrapper.class);
-
-    private final WeakReference<View> viewRef;
+    private final WeakReference<View> backgroundViewRef;
+    private final WeakReference<View> overlayCheckedViewRef;
+    private final AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener;
     private boolean checked;
-    private AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener;
 
-    public CheckableViewWrapper(View view, AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener) {
-        super(view.getContext());
-        viewRef = Ref.weak(view);
+    public CheckableViewWrapper(View backgroundView, View overlayCheckedView, AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener) {
+        super(backgroundView.getContext());
+        setClickable(true);
+        backgroundViewRef = Ref.weak(backgroundView);
+        overlayCheckedViewRef = Ref.weak(overlayCheckedView);
         this.onCheckedChangeListener = onCheckedChangeListener;
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggle();
-                v.invalidate();
-            }
-        });
+        initClickListeners(backgroundView, overlayCheckedView);
     }
 
     @Override
     public void setChecked(boolean checked) {
         this.checked = checked;
         if (this.onCheckedChangeListener != null) {
-            View view = viewRef.get();
-            try {
-                if (Ref.alive(viewRef)) {
-                    view.setVisibility(checked ? View.VISIBLE : View.GONE);
-                }
-                this.onCheckedChangeListener.onCheckedChanged(this, checked);
-            } catch (Throwable t) {
-                String viewClassName = view != null ? view.getClass().getSimpleName() : "null reference to view";
-                LOG.error("toogle() -> onCheckedListener.onCheckedChanged(checked=" + checked + ") failed. (Wraps " + viewClassName + ")", t);
-            }
+            this.onCheckedChangeListener.onCheckedChanged(this, checked);
         }
     }
 
@@ -85,23 +72,71 @@ public final class CheckableViewWrapper<T> extends View implements Checkable {
         setChecked(!checked);
     }
 
-    public void setOnCheckedChangeListener(AbstractListAdapter<T>.CheckboxOnCheckedChangeListener listener) {
-        this.onCheckedChangeListener = listener;
-    }
-
     public void setTag(Object tag) {
-        if (Ref.alive(viewRef)) {
-            LOG.info("setTag("+tag+")");
-            viewRef.get().setTag(tag);
+        if (Ref.alive(backgroundViewRef) && Ref.alive(overlayCheckedViewRef)) {
+            LOG.info("setTag("+tag.getClass().getSimpleName()+")");
+            backgroundViewRef.get().setTag(tag);
+            overlayCheckedViewRef.get().setTag(tag);
         }
     }
 
     public Object getTag() {
-        if (Ref.alive(viewRef)) {
-            LOG.info("getTag()");
-            return viewRef.get().getTag();
+        if (Ref.alive(backgroundViewRef) && Ref.alive(overlayCheckedViewRef)) {
+            LOG.info("getTag() -> " + backgroundViewRef.get().getTag().getClass().getSimpleName());
+            return backgroundViewRef.get().getTag();
         } else {
             return null;
         }
     }
+
+    private void initClickListeners(View backgroundView, View overlayCheckedView) {
+        backgroundView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackgroundViewClick(v);
+            }
+        });
+        backgroundView.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return onBackgroundViewLongClick(v);
+            }
+        });
+        overlayCheckedView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOverlayCheckedViewClick(v);
+            }
+        });
+        overlayCheckedView.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return onOverlayCheckedViewLongClick(v);
+            }
+        });
+    }
+
+    private void onBackgroundViewClick(View v) {
+        LOG.info("onBackgroundViewClick(v="+v.getClass().getSimpleName()+")");
+        if (Ref.alive(overlayCheckedViewRef)) {
+            if (overlayCheckedViewRef.get().getVisibility() == View.VISIBLE) {
+                return;
+            }
+            overlayCheckedViewRef.get().setVisibility(View.VISIBLE);
+            setChecked(true);
+        }
+    }
+
+    private void onOverlayCheckedViewClick(View v) {
+        LOG.info("onOverlayCheckedViewClick(v="+v.getClass().getSimpleName()+")");
+        if (Ref.alive(backgroundViewRef) && Ref.alive(overlayCheckedViewRef)) {
+            overlayCheckedViewRef.get().setVisibility(View.GONE);
+            backgroundViewRef.get().setVisibility(View.VISIBLE);
+            setChecked(false);
+        }
+    }
+
+    public abstract boolean onBackgroundViewLongClick(View v);
+
+    public abstract boolean onOverlayCheckedViewLongClick(View v);
 }

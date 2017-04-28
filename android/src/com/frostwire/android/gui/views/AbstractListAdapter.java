@@ -157,10 +157,6 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         return (checked == null || checked.isEmpty()) ? 0 : checked.size();
     }
 
-    public CheckboxOnCheckedChangeListener getDefaultOnCheckedChangeListener() {
-        return this.checkboxOnCheckedChangeListener;
-    }
-
     public void clearChecked() {
         if (checked != null && checked.size() > 0) {
             checked.clear();
@@ -601,26 +597,38 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         }
     }
 
-    public final class CheckboxOnCheckedChangeListener implements OnCheckedChangeListener {
+    public class CheckboxOnCheckedChangeListener implements OnCheckedChangeListener {
         private final Runnable onPostCheckedChange;
+        private boolean enabled = true;
+
         public CheckboxOnCheckedChangeListener() {
             onPostCheckedChange = null;
         }
+
         public CheckboxOnCheckedChangeListener(Runnable onPostCheckedChange) {
             this.onPostCheckedChange = onPostCheckedChange;
         }
 
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            onItemChecked(buttonView, isChecked);
-            onPostCheckedChange();
+            if (enabled) {
+                onItemChecked(buttonView, isChecked);
+                onPostCheckedChange();
+            }
         }
 
         public void onCheckedChanged(View view, boolean isChecked) {
-            onItemChecked(view, isChecked);
+            if (enabled) {
+                onItemChecked(view, isChecked);
+                onPostCheckedChange();
+            }
         }
 
         private void onPostCheckedChange() {
-            if (onPostCheckedChange != null) {
+            if (enabled && onPostCheckedChange != null) {
                 onPostCheckedChange.run();
             }
         }

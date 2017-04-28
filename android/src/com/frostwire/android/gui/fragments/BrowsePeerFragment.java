@@ -304,6 +304,10 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
     public void onShow() {
     }
 
+    public boolean getSelectAllMode() {
+        return selectAllModeOn;
+    }
+
     @Override
     protected void initComponents(View v) {
         findView(v, R.id.fragment_browse_peer_select_all_container).setVisibility(View.GONE);
@@ -479,7 +483,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
             byte fileType = (Byte) data[0];
             List<FileDescriptor> items = (List<FileDescriptor>) data[1];
 
-            adapter = new FileListAdapter(getActivity(), items, fileType) {
+            adapter = new FileListAdapter(getActivity(), items, fileType, selectAllModeOn) {
                 @Override
                 protected void onLocalPlay() {
                     if (adapter != null) {
@@ -529,6 +533,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
     private void enableSelectAllMode(boolean selectAll, boolean autoCheckAll) {
         selectAllModeOn = selectAll;
         selectAllCheckboxContainer.setVisibility(selectAllModeOn && adapter.getCount() > 0 ? View.VISIBLE : View.GONE);
+        adapter.setSelectAllMode(selectAllModeOn);
         adapter.setCheckboxesVisibility(selectAllModeOn);
         adapter.setShowMenuOnClick(!selectAll);
         selectAllCheckbox.setChecked(autoCheckAll);
