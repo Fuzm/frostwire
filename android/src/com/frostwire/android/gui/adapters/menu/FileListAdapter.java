@@ -141,6 +141,8 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
                     checkableView.setTag(item);
                     checkableView.setOnCheckedChangeListener(getDefaultOnCheckedChangeListener());
                 }
+
+                checkableView.setChecked(getChecked().contains(item));
             }
         }
     }
