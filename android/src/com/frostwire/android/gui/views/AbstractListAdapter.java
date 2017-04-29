@@ -602,7 +602,7 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
         private boolean enabled = true;
 
         public CheckboxOnCheckedChangeListener() {
-            onPostCheckedChange = null;
+            this(null);
         }
 
         public CheckboxOnCheckedChangeListener(Runnable onPostCheckedChange) {
@@ -622,8 +622,11 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
 
         public void onCheckedChanged(View view, boolean isChecked) {
             if (enabled) {
+                LOG.info("onCheckedChanged(view=" + view + ", isChecked=" + isChecked + ")");
                 onItemChecked(view, isChecked);
                 onPostCheckedChange();
+            } {
+                LOG.info("onCheckedChanged(view=" + view.getClass().getSimpleName() + ", isChecked=" + isChecked + ") aborted, listener disabled");
             }
         }
 

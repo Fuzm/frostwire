@@ -493,6 +493,7 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
 
                 @Override
                 protected void onItemChecked(View v, boolean isChecked) {
+                    LOG.info("BrowsePeerFragment. Anonymous overridden onItemChecked(view=" + v.getClass().getSimpleName() + ", isChecked=" + isChecked + ")");
                     super.onItemChecked(v, isChecked);
                     autoCheckUnCheckSelectAllCheckbox();
                     selectionModeCallback.onItemChecked(getActivity(), adapter.getCheckedCount());
@@ -500,11 +501,13 @@ public class BrowsePeerFragment extends AbstractFragment implements LoaderCallba
 
                 @Override
                 protected boolean onItemLongClicked(View v) {
+                    LOG.info("BrowsePeerFragment. Anonymous overridden onItemLongClicked(view="+v.getClass().getSimpleName()+")");
                     return onFileItemLongClicked(v);
                 }
 
                 @Override
                 protected void onItemClicked(View v) {
+                    LOG.info("BrowsePeerFragment. Anonymous overridden onItemClicked(view="+v.getClass().getSimpleName()+")");
                     onFileItemClicked(v);
                 }
 

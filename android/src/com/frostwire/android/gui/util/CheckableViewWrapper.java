@@ -18,6 +18,7 @@
 
 package com.frostwire.android.gui.util;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.Checkable;
 
@@ -43,8 +44,8 @@ public abstract class CheckableViewWrapper<T> extends View implements Checkable 
     private final AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener;
     private boolean checked;
 
-    public CheckableViewWrapper(View backgroundView, View overlayCheckedView, AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener) {
-        super(backgroundView.getContext());
+    public CheckableViewWrapper(Context context, View backgroundView, View overlayCheckedView, AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener) {
+        super(context);
         setClickable(true);
         backgroundViewRef = Ref.weak(backgroundView);
         overlayCheckedViewRef = Ref.weak(overlayCheckedView);
@@ -54,9 +55,13 @@ public abstract class CheckableViewWrapper<T> extends View implements Checkable 
 
     @Override
     public void setChecked(boolean checked) {
+        LOG.info("setChecked(checked="+checked+")");
         this.checked = checked;
         if (this.onCheckedChangeListener != null) {
-            this.onCheckedChangeListener.onCheckedChanged(this, checked);
+            LOG.warn("setChecked(...) invoking onCheckedChangeListener");
+            this.onCheckedChangeListener.onCheckedChanged(CheckableViewWrapper.this, checked);
+        } else {
+            LOG.warn("setChecked(...) onCheckedChangeListener null");
         }
     }
 
@@ -114,6 +119,7 @@ public abstract class CheckableViewWrapper<T> extends View implements Checkable 
                 return onOverlayCheckedViewLongClick(v);
             }
         });
+        LOG.info("initClickListeners() backgroundView and overlayCheckedView listeners initialized.");
     }
 
     private void onBackgroundViewClick(View v) {
@@ -139,4 +145,8 @@ public abstract class CheckableViewWrapper<T> extends View implements Checkable 
     public abstract boolean onBackgroundViewLongClick(View v);
 
     public abstract boolean onOverlayCheckedViewLongClick(View v);
+
+    public View getBackgroundView() {
+        return Ref.alive(backgroundViewRef) ? backgroundViewRef.get() : null;
+    }
 }

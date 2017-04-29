@@ -29,10 +29,12 @@ import android.provider.MediaStore.Video;
 import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andrew.apollo.utils.MusicUtils;
@@ -119,45 +121,62 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         return layout;
     }
 
-
-    @Override
-    protected void initCheckBox(View view, FileDescriptorItem item) {
+    public View getView(int position, View view, ViewGroup parent) {
         int adapterLayoutId = getViewItemId();
         if (adapterLayoutId == R.layout.view_browse_peer_thumbnail_list_item) {
-            super.initCheckBox(view, item);
-        } else if (adapterLayoutId == R.layout.view_browse_peer_thumbnail_grid_item) {
-            CheckBox regularCheckbox = findView(view, R.id.view_selectable_list_item_checkbox);
-            if (regularCheckbox != null) {
-                regularCheckbox.setVisibility(View.GONE);
-            }
-            final BrowseThumbnailImageButton backgroundView = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
-            final FrameLayout overlayCheckmarkFramelayout = findView(view, R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
-
-            Runnable onPostCheckedRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    LOG.info("CheckboxOnCheckedChangeListener.onPostCheckedChange() runnable here.");
-                }
-            };
-            final CheckboxOnCheckedChangeListener checkboxOnCheckedChangeListener = new CheckboxOnCheckedChangeListener(onPostCheckedRunnable);
-            checkboxOnCheckedChangeListener.setEnabled(false);
-            final CheckableViewWrapper checkableView = new CheckableViewWrapper(backgroundView, overlayCheckmarkFramelayout, checkboxOnCheckedChangeListener) {
-                @Override
-                public boolean onBackgroundViewLongClick(View v) {
-                    onItemClicked(v);
-                    return true;
-                }
-
-                @Override
-                public boolean onOverlayCheckedViewLongClick(View v) {
-                    onItemClicked(v);
-                    return true;
-                }
-            };
-            checkableView.setChecked(getChecked().contains(item));
-            checkboxOnCheckedChangeListener.setEnabled(true);
-            overlayCheckmarkFramelayout.setVisibility(selectAllMode ? View.VISIBLE : View.GONE);
+            return super.getView(position, view, parent);
         }
+        FileDescriptorItem item = getItem(position);
+        Context ctx = getContext();
+
+        if (view == null && ctx != null) {
+            // every list view item is wrapped in a generic container which has a hidden checkbox on the left hand side.
+            view = View.inflate(ctx, adapterLayoutId, null);
+        }
+
+        CheckableViewWrapper checkableViewWrapper = null;
+        try {
+            checkableViewWrapper = initCheckableGridImageView(view, item);
+            populateView(checkableViewWrapper.getBackgroundView(), item);
+        } catch (Throwable e) {
+            LOG.error("Fatal error getting view: " + e.getMessage(), e);
+        }
+
+        return checkableViewWrapper;
+    }
+
+    protected CheckableViewWrapper initCheckableGridImageView(View view, FileDescriptorItem item) {
+        final BrowseThumbnailImageButton backgroundView = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
+        final FrameLayout overlayCheckmarkFramelayout = findView(view, R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
+        Runnable onPostCheckedRunnable = new Runnable() {
+            @Override
+            public void run() {
+                LOG.info("CheckboxOnCheckedChangeListener.onPostCheckedChange() runnable here. selectAllMode=" + selectAllMode);
+            }
+        };
+        final CheckboxOnCheckedChangeListener checkboxOnCheckedChangeListener = new CheckboxOnCheckedChangeListener(onPostCheckedRunnable);
+        final CheckableViewWrapper checkableView = new CheckableViewWrapper(view.getContext(), backgroundView, overlayCheckmarkFramelayout, checkboxOnCheckedChangeListener) {
+            @Override
+            public boolean onBackgroundViewLongClick(View v) {
+                LOG.info("onBackgroundViewLongClick(view=" + v.getClass().getSimpleName() + ")");
+                onItemLongClicked(v);
+                return true;
+            }
+
+            @Override
+            public boolean onOverlayCheckedViewLongClick(View v) {
+                LOG.info("onOverlayCheckedViewLongClick(view=" + v.getClass().getSimpleName() + ")");
+                onItemClicked(v);
+                return true;
+            }
+        };
+        boolean isChecked = getChecked().contains(item);
+        checkboxOnCheckedChangeListener.setEnabled(false);
+        checkableView.setTag(item);
+        checkableView.setChecked(isChecked);
+        checkboxOnCheckedChangeListener.setEnabled(true);
+        overlayCheckmarkFramelayout.setVisibility(selectAllMode && isChecked ? View.VISIBLE : View.GONE);
+        return checkableView;
     }
 
 
