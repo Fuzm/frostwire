@@ -30,11 +30,8 @@ import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andrew.apollo.utils.MusicUtils;
@@ -44,9 +41,8 @@ import com.frostwire.android.core.Constants;
 import com.frostwire.android.core.FileDescriptor;
 import com.frostwire.android.gui.Librarian;
 import com.frostwire.android.gui.adapters.menu.FileListAdapter.FileDescriptorItem;
-import com.frostwire.android.gui.fragments.BrowsePeerFragment;
 import com.frostwire.android.gui.services.Engine;
-import com.frostwire.android.gui.util.CheckableViewWrapper;
+import com.frostwire.android.gui.util.CheckableImageView;
 import com.frostwire.android.gui.util.UIUtils;
 import com.frostwire.android.gui.views.AbstractListAdapter;
 import com.frostwire.android.gui.views.BrowseThumbnailImageButton;
@@ -126,6 +122,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         if (adapterLayoutId == R.layout.view_browse_peer_thumbnail_list_item) {
             return super.getView(position, view, parent);
         }
+
         FileDescriptorItem item = getItem(position);
         Context ctx = getContext();
 
@@ -134,10 +131,10 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
             view = View.inflate(ctx, adapterLayoutId, null);
         }
 
-        CheckableViewWrapper checkableViewWrapper = null;
+        CheckableImageView checkableViewWrapper = null;
+
         try {
             checkableViewWrapper = initCheckableGridImageView(view, item);
-            populateView(checkableViewWrapper.getBackgroundView(), item);
         } catch (Throwable e) {
             LOG.error("Fatal error getting view: " + e.getMessage(), e);
         }
@@ -145,40 +142,35 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         return checkableViewWrapper;
     }
 
-    protected CheckableViewWrapper initCheckableGridImageView(View view, FileDescriptorItem item) {
-        final BrowseThumbnailImageButton backgroundView = findView(view, R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
-        final FrameLayout overlayCheckmarkFramelayout = findView(view, R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
+    protected CheckableImageView initCheckableGridImageView(View view, FileDescriptorItem item) throws Throwable {
         Runnable onPostCheckedRunnable = new Runnable() {
             @Override
             public void run() {
                 LOG.info("CheckboxOnCheckedChangeListener.onPostCheckedChange() runnable here. selectAllMode=" + selectAllMode);
             }
         };
-        final CheckboxOnCheckedChangeListener checkboxOnCheckedChangeListener = new CheckboxOnCheckedChangeListener(onPostCheckedRunnable);
-        final CheckableViewWrapper checkableView = new CheckableViewWrapper(view.getContext(), backgroundView, overlayCheckmarkFramelayout, checkboxOnCheckedChangeListener) {
-            @Override
-            public boolean onBackgroundViewLongClick(View v) {
-                LOG.info("onBackgroundViewLongClick(view=" + v.getClass().getSimpleName() + ")");
-                onItemLongClicked(v);
-                return true;
-            }
-
-            @Override
-            public boolean onOverlayCheckedViewLongClick(View v) {
-                LOG.info("onOverlayCheckedViewLongClick(view=" + v.getClass().getSimpleName() + ")");
-                onItemClicked(v);
-                return true;
-            }
-        };
         boolean isChecked = getChecked().contains(item);
-        checkboxOnCheckedChangeListener.setEnabled(false);
+        final CheckboxOnCheckedChangeListener checkboxOnCheckedChangeListener = new CheckboxOnCheckedChangeListener(onPostCheckedRunnable);
+        Uri[] uris = new Uri[2];
+        getFileItemThumbnailUris(item, uris);
+        final CheckableImageView checkableView = new CheckableImageView(view.getContext(), 128, uris[0], uris[1], checkboxOnCheckedChangeListener, isChecked);
+        checkableView.setCheckableMode(selectAllMode);
         checkableView.setTag(item);
-        checkableView.setChecked(isChecked);
-        checkboxOnCheckedChangeListener.setEnabled(true);
-        overlayCheckmarkFramelayout.setVisibility(selectAllMode && isChecked ? View.VISIBLE : View.GONE);
+        checkableView.setVisibility(View.VISIBLE);
+        checkableView.forceLayout();
         return checkableView;
     }
 
+    private void getFileItemThumbnailUris(FileDescriptorItem item, Uri[] uris) {
+        if (item.fd.fileType == Constants.FILE_TYPE_VIDEOS) {
+            uris[0] = ContentUris.withAppendedId(Video.Media.EXTERNAL_CONTENT_URI, item.fd.id);
+            uris[1] = ImageLoader.getMetadataArtUri(uris[0]);
+        } else if (item.fd.fileType == Constants.FILE_TYPE_PICTURES) {
+            Uri uri = ContentUris.withAppendedId(Images.Media.EXTERNAL_CONTENT_URI, item.fd.id);
+            uris[0] = uri;
+            uris[1] = null;
+        }
+    }
 
     public byte getFileType() {
         return fileType;

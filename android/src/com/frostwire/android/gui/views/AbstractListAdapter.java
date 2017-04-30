@@ -609,6 +609,10 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
             this.onPostCheckedChange = onPostCheckedChange;
         }
 
+        public boolean isEnabled() {
+            return this.enabled;
+        }
+
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
         }
