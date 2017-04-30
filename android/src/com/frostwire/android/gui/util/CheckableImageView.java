@@ -21,6 +21,7 @@ package com.frostwire.android.gui.util;
 import android.content.Context;
 import android.net.Uri;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 
@@ -47,19 +48,19 @@ public final class CheckableImageView<T> extends View implements Checkable {
     private FrameLayout checkedOverlayView;
     private boolean checkableMode;
 
-    public CheckableImageView(Context context, int dimensions, Uri imageUri, Uri imageRetryUri, AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener, boolean checked) {
+    public CheckableImageView(Context context, ViewGroup containerView, int dimensions, Uri imageUri, Uri imageRetryUri, AbstractListAdapter<T>.CheckboxOnCheckedChangeListener onCheckedChangeListener, boolean checked) {
         super(context);
         setClickable(true);
         this.onCheckedChangeListener = onCheckedChangeListener;
-        initComponents(context, dimensions, imageUri, imageRetryUri);
+        initComponents(context, containerView, dimensions, imageUri, imageRetryUri);
         this.onCheckedChangeListener.setEnabled(false);
         setChecked(checked);
         this.onCheckedChangeListener.setEnabled(true);
         initClickListeners();
     }
 
-    private void initComponents(Context context, int dimensions, final Uri imageUri, Uri imageRetryUri) {
-        View view = View.inflate(getContext(), R.layout.view_browse_peer_thumbnail_grid_item, null);
+    private void initComponents(Context context, ViewGroup containerView, int dimensions, final Uri imageUri, Uri imageRetryUri) {
+        View view = (containerView == null) ? View.inflate(getContext(), R.layout.view_browse_peer_thumbnail_grid_item, containerView) : containerView;
         backgroundView = (BrowseThumbnailImageButton) view.findViewById(R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
         checkedOverlayView = (FrameLayout) view.findViewById(R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
         ImageLoader imageLoader = ImageLoader.getInstance(context);
@@ -132,5 +133,8 @@ public final class CheckableImageView<T> extends View implements Checkable {
 
     public void setCheckableMode(boolean checkableMode) {
         this.checkableMode = checkableMode;
+        if (!checkableMode) {
+            setChecked(false);
+        }
     }
 }

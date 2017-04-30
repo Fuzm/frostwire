@@ -30,7 +30,6 @@ import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -131,18 +130,16 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
             view = View.inflate(ctx, adapterLayoutId, null);
         }
 
-        CheckableImageView checkableViewWrapper = null;
-
         try {
-            checkableViewWrapper = initCheckableGridImageView(view, item);
+            view = initCheckableGridImageView(view, item);
         } catch (Throwable e) {
             LOG.error("Fatal error getting view: " + e.getMessage(), e);
         }
 
-        return checkableViewWrapper;
+        return view;
     }
 
-    protected CheckableImageView initCheckableGridImageView(View view, FileDescriptorItem item) throws Throwable {
+    protected View initCheckableGridImageView(View view, FileDescriptorItem item) throws Throwable {
         Runnable onPostCheckedRunnable = new Runnable() {
             @Override
             public void run() {
@@ -153,12 +150,16 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         final CheckboxOnCheckedChangeListener checkboxOnCheckedChangeListener = new CheckboxOnCheckedChangeListener(onPostCheckedRunnable);
         Uri[] uris = new Uri[2];
         getFileItemThumbnailUris(item, uris);
-        final CheckableImageView checkableView = new CheckableImageView(view.getContext(), 128, uris[0], uris[1], checkboxOnCheckedChangeListener, isChecked);
+        final CheckableImageView checkableView = new CheckableImageView(view.getContext(),
+                (view instanceof ViewGroup ) ? (ViewGroup) view : null,
+                128,
+                uris[0], uris[1],
+                checkboxOnCheckedChangeListener, isChecked);
         checkableView.setCheckableMode(selectAllMode);
         checkableView.setTag(item);
         checkableView.setVisibility(View.VISIBLE);
         checkableView.forceLayout();
-        return checkableView;
+        return view == null ? checkableView : view;
     }
 
     private void getFileItemThumbnailUris(FileDescriptorItem item, Uri[] uris) {
