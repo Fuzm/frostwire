@@ -52,17 +52,20 @@ public final class CheckableImageView<T> extends View implements Checkable {
         super(context);
         setClickable(true);
         this.onCheckedChangeListener = onCheckedChangeListener;
-        initComponents(context, containerView, dimensions, imageUri, imageRetryUri);
+        initComponents(context, containerView, dimensions, imageUri, imageRetryUri, checked);
         this.onCheckedChangeListener.setEnabled(false);
         setChecked(checked);
         this.onCheckedChangeListener.setEnabled(true);
         initClickListeners();
     }
 
-    private void initComponents(Context context, ViewGroup containerView, int dimensions, final Uri imageUri, Uri imageRetryUri) {
-        View view = (containerView == null) ? View.inflate(getContext(), R.layout.view_browse_peer_thumbnail_grid_item, containerView) : containerView;
-        backgroundView = (BrowseThumbnailImageButton) view.findViewById(R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
-        checkedOverlayView = (FrameLayout) view.findViewById(R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
+    private void initComponents(Context context, ViewGroup containerView, int dimensions, final Uri imageUri, Uri imageRetryUri, boolean checked) {
+        if (containerView == null) {
+            LOG.error("initComponents() containerView can't be null");
+            return;
+        }
+        backgroundView = (BrowseThumbnailImageButton) containerView.findViewById(R.id.view_browse_peer_thumbnail_grid_item_browse_thumbnail_image_button);
+        checkedOverlayView = (FrameLayout) containerView.findViewById(R.id.view_browse_peer_thumbnail_grid_overlay_checkmark_framelayout);
         ImageLoader imageLoader = ImageLoader.getInstance(context);
         imageLoader.load(imageUri, imageRetryUri, backgroundView, dimensions, dimensions, new Callback.EmptyCallback() {
             @Override
@@ -82,7 +85,7 @@ public final class CheckableImageView<T> extends View implements Checkable {
         LOG.info("setChecked(checked="+checked+")");
         this.checked = checked;
         backgroundView.setVisibility(View.VISIBLE);
-        checkedOverlayView.setVisibility(this.checked ? View.VISIBLE : View.GONE);
+        checkedOverlayView.setVisibility(checked ? View.VISIBLE : View.GONE);
         if (this.onCheckedChangeListener != null && this.onCheckedChangeListener.isEnabled()) {
             LOG.warn("setChecked(...) invoking onCheckedChangeListener");
             this.onCheckedChangeListener.onCheckedChanged(CheckableImageView.this, checked);

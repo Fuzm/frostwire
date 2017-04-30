@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.andrew.apollo.utils.MusicUtils;
@@ -122,16 +123,20 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
             return super.getView(position, view, parent);
         }
 
+        // see parent and see where the container inflation happens and try to mimick that here.
+
         FileDescriptorItem item = getItem(position);
         Context ctx = getContext();
 
+        LOG.info("getView(position=" + position + ", view=" + view + ", parent=" + parent + ")");
         if (view == null && ctx != null) {
             // every list view item is wrapped in a generic container which has a hidden checkbox on the left hand side.
-            view = View.inflate(ctx, adapterLayoutId, null);
+            view = View.inflate(ctx, R.layout.view_browse_peer_thumbnail_grid_item, null);
+            LOG.info("getView(position="+position+") view was null inflated it");
         }
 
         try {
-            view = initCheckableGridImageView(view, item);
+            initCheckableGridImageView((RelativeLayout) view, item);
         } catch (Throwable e) {
             LOG.error("Fatal error getting view: " + e.getMessage(), e);
         }
@@ -139,27 +144,30 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
         return view;
     }
 
-    protected View initCheckableGridImageView(View view, FileDescriptorItem item) throws Throwable {
+    protected void initCheckableGridImageView(ViewGroup view, FileDescriptorItem item) throws Throwable {
+        LOG.info("initCheckableGridImageView(view="+view+")");
         Runnable onPostCheckedRunnable = new Runnable() {
             @Override
             public void run() {
                 LOG.info("CheckboxOnCheckedChangeListener.onPostCheckedChange() runnable here. selectAllMode=" + selectAllMode);
             }
         };
-        boolean isChecked = getChecked().contains(item);
         final CheckboxOnCheckedChangeListener checkboxOnCheckedChangeListener = new CheckboxOnCheckedChangeListener(onPostCheckedRunnable);
+
+        boolean isChecked = getChecked().contains(item);
         Uri[] uris = new Uri[2];
         getFileItemThumbnailUris(item, uris);
-        final CheckableImageView checkableView = new CheckableImageView(view.getContext(),
-                (view instanceof ViewGroup ) ? (ViewGroup) view : null,
+        final CheckableImageView checkableView = new CheckableImageView(
+                view.getContext(),
+                view,
                 128,
                 uris[0], uris[1],
                 checkboxOnCheckedChangeListener, isChecked);
+        checkboxOnCheckedChangeListener.setEnabled(false);
         checkableView.setCheckableMode(selectAllMode);
         checkableView.setTag(item);
         checkableView.setVisibility(View.VISIBLE);
-        checkableView.forceLayout();
-        return view == null ? checkableView : view;
+        checkboxOnCheckedChangeListener.setEnabled(true);
     }
 
     private void getFileItemThumbnailUris(FileDescriptorItem item, Uri[] uris) {
@@ -420,7 +428,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
     }
 
     private void populateSDState(View v, FileDescriptorItem item) {
-        if (inGridMode()){
+        if (inGridMode()) {
             // gotta see what to do here
             return;
         }

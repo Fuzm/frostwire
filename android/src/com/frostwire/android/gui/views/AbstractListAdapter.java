@@ -619,6 +619,7 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
 
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (enabled) {
+                LOG.info("onCheckedChanged(buttonView=" + buttonView + ", isChecked=" + isChecked + ")");
                 onItemChecked(buttonView, isChecked);
                 onPostCheckedChange();
             }
@@ -636,6 +637,7 @@ public abstract class AbstractListAdapter<T> extends BaseAdapter implements Filt
 
         private void onPostCheckedChange() {
             if (enabled && onPostCheckedChange != null) {
+                LOG.info("onPostCheckedChange()");
                 onPostCheckedChange.run();
             }
         }
