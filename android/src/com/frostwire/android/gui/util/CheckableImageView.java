@@ -87,20 +87,17 @@ public final class CheckableImageView<T> extends View implements Checkable {
         backgroundView.setVisibility(View.VISIBLE);
         checkedOverlayView.setVisibility(checked ? View.VISIBLE : View.GONE);
         if (this.onCheckedChangeListener != null && this.onCheckedChangeListener.isEnabled()) {
-            LOG.warn("setChecked(...) invoking onCheckedChangeListener");
             this.onCheckedChangeListener.onCheckedChanged(CheckableImageView.this, checked);
         }
     }
 
     @Override
     public boolean isChecked() {
-        LOG.info("isChecked()");
         return this.checked;
     }
 
     @Override
     public void toggle() {
-        LOG.info("toggle()");
         setChecked(!checked);
     }
 
@@ -117,20 +114,15 @@ public final class CheckableImageView<T> extends View implements Checkable {
                 onOverlayCheckedViewClick(v);
             }
         });
-        LOG.info("initClickListeners() backgroundView and overlayCheckedView listeners initialized.");
     }
 
     private void onBackgroundViewClick(View v) {
         if (checkableMode) {
-            LOG.info("onBackgroundViewClick(v="+v.getClass().getSimpleName()+") checkableMode=true, checking");
             setChecked(true);
-        } else {
-            LOG.info("onBackgroundViewClick(v="+v.getClass().getSimpleName()+") checkableMode=false, not checking");
         }
     }
 
     private void onOverlayCheckedViewClick(View v) {
-        LOG.info("onOverlayCheckedViewClick(v="+v.getClass().getSimpleName()+")");
         setChecked(false);
     }
 

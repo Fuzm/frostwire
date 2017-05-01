@@ -137,6 +137,7 @@ public class FileListAdapter extends AbstractListAdapter<FileDescriptorItem> {
 
         try {
             initCheckableGridImageView((RelativeLayout) view, item);
+            initTouchFeedback(view, item);
         } catch (Throwable e) {
             LOG.error("Fatal error getting view: " + e.getMessage(), e);
         }
